@@ -1,4 +1,5 @@
 using EventArch.Api.Errors;
+using EventArch.Api.Idempotency;
 using EventArch.Application.Abstractions;
 using EventArch.Application.Accounts.Transfer;
 using EventArch.Domain.Common;
@@ -15,7 +16,9 @@ namespace EventArch.Api.Controllers;
 public sealed class TransfersController : ControllerBase
 {
     [HttpPost]
+    [Idempotent]
     [ProducesResponseType<TransferResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]

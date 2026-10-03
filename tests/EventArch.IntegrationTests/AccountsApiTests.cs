@@ -31,7 +31,7 @@ public class AccountsApiTests(EventArchApiFactory factory)
         Guid accountId = await client.OpenAccountAsync();
 
         await client.DepositAsync(accountId, 100m);
-        HttpResponseMessage withdrawal = await client.PostAsJsonAsync(
+        HttpResponseMessage withdrawal = await client.PostIdempotentAsync(
             $"/accounts/{accountId}/withdrawals", new { amount = 30.50m });
 
         Assert.Equal(HttpStatusCode.NoContent, withdrawal.StatusCode);
@@ -44,7 +44,7 @@ public class AccountsApiTests(EventArchApiFactory factory)
         Guid accountId = await client.OpenAccountAsync();
         await client.DepositAsync(accountId, 10m);
 
-        HttpResponseMessage response = await client.PostAsJsonAsync(
+        HttpResponseMessage response = await client.PostIdempotentAsync(
             $"/accounts/{accountId}/withdrawals", new { amount = 10.01m });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
@@ -57,7 +57,7 @@ public class AccountsApiTests(EventArchApiFactory factory)
     {
         Guid accountId = await client.OpenAccountAsync();
 
-        HttpResponseMessage response = await client.PostAsJsonAsync(
+        HttpResponseMessage response = await client.PostIdempotentAsync(
             $"/accounts/{accountId}/deposits", new { amount = 10.001m });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -80,7 +80,7 @@ public class AccountsApiTests(EventArchApiFactory factory)
         Guid accountId = await client.OpenAccountAsync();
         await client.PostAsync($"/accounts/{accountId}/freeze", null);
 
-        HttpResponseMessage response = await client.PostAsJsonAsync(
+        HttpResponseMessage response = await client.PostIdempotentAsync(
             $"/accounts/{accountId}/deposits", new { amount = 5m });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
@@ -94,7 +94,7 @@ public class AccountsApiTests(EventArchApiFactory factory)
         Guid destinationId = await client.OpenAccountAsync("Destination");
         await client.DepositAsync(sourceId, 100m);
 
-        HttpResponseMessage response = await client.PostAsJsonAsync("/transfers", new
+        HttpResponseMessage response = await client.PostIdempotentAsync("/transfers", new
         {
             sourceAccountId = sourceId,
             destinationAccountId = destinationId,

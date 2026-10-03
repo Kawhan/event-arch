@@ -1,4 +1,5 @@
 using EventArch.Api.Errors;
+using EventArch.Api.Idempotency;
 using EventArch.Application.Abstractions;
 using EventArch.Application.Accounts.CloseAccount;
 using EventArch.Application.Accounts.Deposit;
@@ -52,8 +53,10 @@ public sealed class AccountsController : ControllerBase
     }
 
     [HttpPost("{accountId:guid}/deposits")]
+    [Idempotent]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Deposit(
         Guid accountId,
         AmountRequest request,
@@ -66,8 +69,10 @@ public sealed class AccountsController : ControllerBase
     }
 
     [HttpPost("{accountId:guid}/withdrawals")]
+    [Idempotent]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Withdraw(
         Guid accountId,
         AmountRequest request,

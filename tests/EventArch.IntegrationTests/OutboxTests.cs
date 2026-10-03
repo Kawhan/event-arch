@@ -39,7 +39,7 @@ public class OutboxTests(EventArchApiFactory factory)
     {
         Guid accountId = await client.OpenAccountAsync();
 
-        await client.PostAsJsonAsync($"/accounts/{accountId}/withdrawals", new { amount = 1m });
+        await client.PostIdempotentAsync($"/accounts/{accountId}/withdrawals", new { amount = 1m });
 
         // The business rule rejected the operation, so nothing may reach other services.
         Assert.Null(await FindOutboxMessageAsync("MoneyWithdrawnIntegrationEvent", accountId));

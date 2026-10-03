@@ -1,4 +1,5 @@
 using EventArch.Api.Errors;
+using EventArch.Api.Idempotency;
 using EventArch.Application;
 using EventArch.Infrastructure;
 using EventArch.Infrastructure.Persistence;
@@ -21,7 +22,7 @@ try
         .Enrich.FromLogContext());
 
     builder.Services.AddControllers();
-    builder.Services.AddOpenApi();
+    builder.Services.AddOpenApi(options => options.AddOperationTransformer<IdempotencyKeyOpenApiTransformer>());
     builder.Services.AddProblemDetails();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 

@@ -77,6 +77,26 @@ Todos os erros seguem o padrão **ProblemDetails** (RFC 7807) e trazem um
 | `404` | Conta não encontrada | `Account.NotFound` |
 | `409` | Regra de negócio violada | `Account.InsufficientFunds`, `Account.Frozen`, `Account.BalanceNotZero` |
 | `409` | Duas requisições alteraram a mesma conta ao mesmo tempo | `Concurrency.Conflict` |
+| `400` | Rota de dinheiro sem o cabeçalho `Idempotency-Key` | `Idempotency.KeyRequired` |
+| `409` | Duas requisições com a mesma chave ao mesmo tempo | `Idempotency.ConcurrentRequest` |
+| `422` | Chave já usada para uma requisição diferente | `Idempotency.KeyReused` |
+
+### Idempotência
+
+Depósito, saque e transferência exigem o cabeçalho **`Idempotency-Key`**,
+um valor único por operação (por exemplo, um GUID novo). Isso torna seguro
+repetir a requisição depois de um timeout:
+
+- **Mesma chave e mesmo corpo:** devolve a resposta original, com o cabeçalho
+  `Idempotency-Replayed: true`, sem movimentar dinheiro de novo. Vale também
+  para erros de negócio: um saque recusado por falta de saldo continua
+  recusado na repetição.
+- **Mesma chave e corpo diferente:** `422`, e nada é executado.
+- **Atomicidade:** a chave e a resposta são gravadas na tabela
+  `idempotency_keys` **na mesma transação** da operação. Se duas requisições
+  com a mesma chave chegarem juntas, só uma faz commit; a outra é desfeita por
+  inteiro.
+- Erros `5xx` não são gravados, então a repetição executa de novo.
 
 ---
 
@@ -268,6 +288,10 @@ dotnet test
 ---
 
 ## Limitações conhecidas e evoluções
+
+- **Chaves de idempotência não expiram.** A tabela `idempotency_keys` cresce
+  para sempre; falta um job que apague chaves antigas (por exemplo, com mais de
+  24 horas).
 
 - **O saldo é um valor mutável.** A coluna `accounts.balance` é atualizada a
   cada operação, e os eventos são só um efeito colateral para avisar outros

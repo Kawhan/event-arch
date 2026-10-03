@@ -1,4 +1,5 @@
 using EventArch.Application.Abstractions;
+using EventArch.Infrastructure.Idempotency;
 using EventArch.Infrastructure.Outbox;
 using EventArch.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ public static class DependencyInjection
         services.AddDbContext<EventArchDbContext>(options => options.UseNpgsql(databaseConnection));
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IIdempotencyStore, IdempotencyStore>();
 
         // The API only publishes, so Rebus runs as a one-way client (no input queue).
         services.AddRebus(configure => configure

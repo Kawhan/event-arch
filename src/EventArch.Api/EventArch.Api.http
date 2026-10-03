@@ -13,21 +13,27 @@ Content-Type: application/json
 ### Get account
 GET {{baseUrl}}/accounts/{{accountId}}
 
+# Money routes require an Idempotency-Key; {{$guid}} creates a new one per send.
+# To test a retry, replace it with a fixed value and send twice.
+
 ### Deposit
 POST {{baseUrl}}/accounts/{{accountId}}/deposits
 Content-Type: application/json
+Idempotency-Key: {{$guid}}
 
 { "amount": 100.00 }
 
 ### Withdraw
 POST {{baseUrl}}/accounts/{{accountId}}/withdrawals
 Content-Type: application/json
+Idempotency-Key: {{$guid}}
 
 { "amount": 30.00 }
 
 ### Transfer
 POST {{baseUrl}}/transfers
 Content-Type: application/json
+Idempotency-Key: {{$guid}}
 
 { "sourceAccountId": "{{accountId}}", "destinationAccountId": "{{otherAccountId}}", "amount": 10.00 }
 

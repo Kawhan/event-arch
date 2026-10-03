@@ -29,6 +29,16 @@ internal sealed class GlobalExceptionHandler(
                 Extensions = { ["code"] = "Concurrency.Conflict" }
             };
         }
+        else if (exception is IdempotencyKeyConflictException)
+        {
+            logger.LogWarning(exception, "Concurrent requests with the same idempotency key");
+            problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Detail = exception.Message,
+                Extensions = { ["code"] = "Idempotency.ConcurrentRequest" }
+            };
+        }
         else
         {
             logger.LogError(exception, "Unhandled exception");
