@@ -1,5 +1,7 @@
 # event-arch
 
+[![CI](https://github.com/Kawhan/event-arch/actions/workflows/ci.yml/badge.svg)](https://github.com/Kawhan/event-arch/actions/workflows/ci.yml)
+
 API de contas bancárias em DDD, orientada a eventos, em C# / .NET 10.
 
 Cada operação de negócio gera um **evento de domínio**. O evento é gravado em
@@ -254,6 +256,9 @@ dotnet test
   cria um Postgres e um RabbitMQ descartáveis, sobe a API em memória e apaga
   tudo no final. Não usa nem altera os containers do compose. Cobre o HTTP de
   ponta a ponta, o Outbox, a publicação no RabbitMQ e a concorrência.
+- **CI:** o GitHub Actions ([ci.yml](.github/workflows/ci.yml)) compila com
+  avisos tratados como erro e roda todos os testes a cada push na `main` e em
+  todo pull request.
 
 **Ver uma mensagem parada no RabbitMQ:** pare o consumer com
 `docker compose stop statement-worker`, faça um depósito e abra a fila
