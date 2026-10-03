@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\EventArch.Api\EventArch.Api.csproj" />
+    <ProjectReference Include="..\..\src\EventArch.Statement.Worker\EventArch.Statement.Worker.csproj" />
   </ItemGroup>
 
 </Project>
