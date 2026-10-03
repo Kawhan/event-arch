@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EventArch.Api/EventArch.Api.csproj" />
+    <Project Path="src/EventArch.Application/EventArch.Application.csproj" />
+    <Project Path="src/EventArch.Contracts/EventArch.Contracts.csproj" />
+    <Project Path="src/EventArch.Domain/EventArch.Domain.csproj" />
+    <Project Path="src/EventArch.Infrastructure/EventArch.Infrastructure.csproj" />
+    <Project Path="src/EventArch.Statement.Worker/EventArch.Statement.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EventArch.Domain.Tests/EventArch.Domain.Tests.csproj" />
+    <Project Path="tests/EventArch.IntegrationTests/EventArch.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

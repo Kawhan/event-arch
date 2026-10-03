@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:5190
+
+### Open an account (copy the returned accountId into the variables below)
+POST {{baseUrl}}/accounts
+Content-Type: application/json
+
+{ "holderName": "Jane Doe" }
+
+###
+@accountId = 00000000-0000-0000-0000-000000000000
+@otherAccountId = 00000000-0000-0000-0000-000000000000
+
+### Get account
+GET {{baseUrl}}/accounts/{{accountId}}
+
+### Deposit
+POST {{baseUrl}}/accounts/{{accountId}}/deposits
+Content-Type: application/json
+
+{ "amount": 100.00 }
+
+### Withdraw
+POST {{baseUrl}}/accounts/{{accountId}}/withdrawals
+Content-Type: application/json
+
+{ "amount": 30.00 }
+
+### Transfer
+POST {{baseUrl}}/transfers
+Content-Type: application/json
+
+{ "sourceAccountId": "{{accountId}}", "destinationAccountId": "{{otherAccountId}}", "amount": 10.00 }
+
+### Freeze
+POST {{baseUrl}}/accounts/{{accountId}}/freeze
+
+### Unfreeze
+POST {{baseUrl}}/accounts/{{accountId}}/unfreeze
+
+### Close (requires zero balance)
+POST {{baseUrl}}/accounts/{{accountId}}/close
