@@ -62,6 +62,7 @@ internal sealed class OutboxPublisherWorker(
             .FromSql($"""
                 SELECT * FROM outbox_messages
                 WHERE processed_on_utc IS NULL
+                  AND dead_lettered_on_utc IS NULL
                 ORDER BY occurred_on_utc
                 LIMIT {options.Value.BatchSize}
                 FOR UPDATE SKIP LOCKED
@@ -82,9 +83,26 @@ internal sealed class OutboxPublisherWorker(
             }
             catch (Exception exception)
             {
-                // Keep the message pending; it is retried on the next cycle.
-                message.MarkAsFailed(exception.Message);
-                logger.LogWarning(exception, "Failed to publish outbox message {OutboxMessageId}", message.Id);
+                bool deadLettered = message.MarkAsFailed(
+                    exception.Message, options.Value.MaxAttempts, timeProvider.GetUtcNow().UtcDateTime);
+
+                if (deadLettered)
+                {
+                    // Out of the queue for good, so it can no longer block newer messages.
+                    // Needs a human: fix the cause, then clear dead_lettered_on_utc to retry it.
+                    logger.LogError(
+                        exception,
+                        "Outbox message {OutboxMessageId} dead-lettered after {Attempts} failed attempts",
+                        message.Id, message.Attempts);
+                }
+                else
+                {
+                    // Possibly temporary (e.g. broker unavailable): retried on the next cycle.
+                    logger.LogWarning(
+                        exception,
+                        "Failed to publish outbox message {OutboxMessageId} (attempt {Attempts} of {MaxAttempts})",
+                        message.Id, message.Attempts, options.Value.MaxAttempts);
+                }
             }
         }
 

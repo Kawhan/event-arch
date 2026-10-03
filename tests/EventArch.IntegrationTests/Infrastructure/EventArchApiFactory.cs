@@ -20,7 +20,7 @@ namespace EventArch.IntegrationTests.Infrastructure;
 /// </summary>
 // Any API type works as the entry point marker. Program is not used because the API and
 // the worker both generate a global "Program" class, which would be ambiguous here.
-public sealed class EventArchApiFactory : WebApplicationFactory<AccountsController>, IAsyncLifetime
+public class EventArchApiFactory : WebApplicationFactory<AccountsController>, IAsyncLifetime
 {
     // Same images as docker-compose.yml, so tests run against the versions used locally.
     private readonly PostgreSqlContainer postgresContainer = new PostgreSqlBuilder("postgres:17").Build();
@@ -56,6 +56,15 @@ public sealed class EventArchApiFactory : WebApplicationFactory<AccountsControll
 
         // Publish quickly so tests that wait for messages stay fast.
         builder.UseSetting("Outbox:PollingInterval", "00:00:00.200");
+
+        ConfigureTestSettings(builder);
+    }
+
+    /// <summary>
+    /// Lets a specialized fixture change API settings without repeating the container setup.
+    /// </summary>
+    protected virtual void ConfigureTestSettings(IWebHostBuilder builder)
+    {
     }
 
     private async Task<IHost> StartWorkerAsync()

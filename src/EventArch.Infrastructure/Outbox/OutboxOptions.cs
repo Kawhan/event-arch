@@ -12,4 +12,7 @@ public sealed class OutboxOptions
 
     /// <summary>Maximum number of messages published per transaction.</summary>
     public int BatchSize { get; init; } = 50;
+
+    /// <summary>Failed attempts after which a message is dead-lettered and no longer retried.</summary>
+    public int MaxAttempts { get; init; } = 10;
 }

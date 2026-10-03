@@ -216,6 +216,14 @@ sequenceDiagram
   como publicada falhar, a mensagem é publicada de novo. Por isso o consumer é
   **idempotente**: o `EventId` é a chave primária da linha de extrato, e um
   evento repetido é ignorado.
+- **Mensagens que nunca publicam.** Cada falha de publicação incrementa
+  `outbox_messages.attempts`. Ao atingir `Outbox:MaxAttempts` (padrão 10), a
+  mensagem recebe `dead_lettered_on_utc`, sai da fila do publicador e gera um
+  log de **Error**. Assim, mensagens quebradas não bloqueiam as que vêm atrás.
+  Para investigar:
+  `SELECT id, type, attempts, error FROM outbox_messages WHERE dead_lettered_on_utc IS NOT NULL;`
+  Depois de corrigir a causa, limpar `dead_lettered_on_utc` e `attempts` faz a
+  mensagem ser tentada de novo.
 - **Falhas no consumer.** O Rebus tenta processar a mensagem 5 vezes e depois
   a move para a fila `error`, para análise.
 - **Concorrência.** A coluna de sistema `xmin` do Postgres funciona como versão

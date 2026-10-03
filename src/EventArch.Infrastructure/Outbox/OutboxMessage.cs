@@ -37,6 +37,15 @@ public sealed class OutboxMessage
     /// <summary>Last publishing error, kept for troubleshooting.</summary>
     public string? Error { get; private set; }
 
+    /// <summary>How many times publishing this message has failed.</summary>
+    public int Attempts { get; private set; }
+
+    /// <summary>
+    /// Set when the message failed too many times. Dead messages are never retried,
+    /// so they cannot block the ones behind them; they wait for manual investigation.
+    /// </summary>
+    public DateTime? DeadLetteredOnUtc { get; private set; }
+
     public static OutboxMessage Create(IntegrationEvent integrationEvent, string? correlationId)
     {
         Type eventType = integrationEvent.GetType();
@@ -66,8 +75,22 @@ public sealed class OutboxMessage
         Error = null;
     }
 
-    public void MarkAsFailed(string error)
+    /// <summary>
+    /// Records a failed publishing attempt and dead-letters the message once
+    /// <paramref name="maxAttempts"/> is reached.
+    /// </summary>
+    /// <returns><c>true</c> when this failure made the message dead.</returns>
+    public bool MarkAsFailed(string error, int maxAttempts, DateTime failedOnUtc)
     {
         Error = error;
+        Attempts++;
+
+        if (Attempts < maxAttempts)
+        {
+            return false;
+        }
+
+        DeadLetteredOnUtc = failedOnUtc;
+        return true;
     }
 }

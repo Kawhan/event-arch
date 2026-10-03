@@ -18,10 +18,12 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
         builder.Property(message => message.CorrelationId).HasColumnName("correlation_id").HasMaxLength(100);
         builder.Property(message => message.ProcessedOnUtc).HasColumnName("processed_on_utc");
         builder.Property(message => message.Error).HasColumnName("error");
+        builder.Property(message => message.Attempts).HasColumnName("attempts");
+        builder.Property(message => message.DeadLetteredOnUtc).HasColumnName("dead_lettered_on_utc");
 
-        // Partial index: the publisher only ever looks for pending messages.
+        // Partial index: the publisher only ever looks for pending messages that are still alive.
         builder.HasIndex(message => message.OccurredOnUtc)
             .HasDatabaseName("ix_outbox_messages_pending")
-            .HasFilter("processed_on_utc IS NULL");
+            .HasFilter("processed_on_utc IS NULL AND dead_lettered_on_utc IS NULL");
     }
 }
